@@ -1,0 +1,13 @@
+[package]
+name = "packing_interface"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5.51", features = ["derive"] }
+iced = { version = "0.13.1", features = ["canvas", "tokio", "svg"] }
+serde = {version = "1.0.228", features = ["derive"]}
+rfd = "0.14"
+rand = "0.9.2"
+serde_json = "1.0.145"
+

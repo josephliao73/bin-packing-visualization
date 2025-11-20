@@ -1,0 +1,3 @@
+./algorithms/*.json
+./packing_interface/src/node_modules/* 
+./packing_interface/src/*.json
