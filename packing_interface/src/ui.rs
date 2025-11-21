@@ -1,19 +1,9 @@
-/*
- *
- * TODO: 
- * have it play animation in order
- * move the rectangles
- * implement rest of the list
- * compile to binary
- *
- */ 
-
 use crate::config_parser::{create_input};
 use iced::widget::{button, checkbox, column, container, row, text, text_input, text_editor, scrollable, slider};
 use iced::{Element, Theme, Alignment, Length, Color, Font, time, Subscription};
 use std::collections::{HashSet};
 use iced::widget::canvas::{Canvas};
-use crate::types::{Rectangle, Input, PackingApp, AlgorithmOutput, ParseOutput, BinCanvas };
+use crate::types::{Rectangle, Input, PackingApp, AlgorithmOutput, ParseOutput, BinCanvas};
 use std::time::Duration;
 
 impl Default for PackingApp {
@@ -64,7 +54,6 @@ impl PackingApp {
                     .pick_file()
                 {
                     if let Ok(contents) = std::fs::read_to_string(&file_path) {
-                        println!("Loaded file: {:?}", file_path);
                         self.rectangle_data = text_editor::Content::with_text(&contents);
                         self.error_message = None;
                     } else {
@@ -184,7 +173,18 @@ impl PackingApp {
                     self.last_mouse_y = y;
                 }
             }
-            Input::RectangleDragEnd => {
+            Input::RectangleDragEnd(is_inside, intersects, new_x, new_y) => {
+                if let Some(dragged_idx) = self.dragged_rect {
+                    if let Some((final_x, final_y)) = self.try_snap_rectangle(dragged_idx, new_x, new_y, is_inside, intersects) {
+                        if let Some(output) = &mut self.algorithm_output {
+                            if dragged_idx < output.placements.len() {
+                                output.placements[dragged_idx].x = final_x;
+                                output.placements[dragged_idx].y = final_y;
+                                self.recalculate_bin_height();
+                            }
+                        }
+                    }
+                }
                 self.dragged_rect = None;
                 self.dragged_rect_offset_x = 0.0;
                 self.dragged_rect_offset_y = 0.0;
@@ -201,6 +201,9 @@ impl PackingApp {
                     self.animating = false;
                 }
             }
+            Input::SnapAndAdjustHeight => {
+                self.recalculate_bin_height();
+            }
         }
     }
 
@@ -211,7 +214,73 @@ impl PackingApp {
             Subscription::none()
         }
     }
-    
+
+    fn try_snap_rectangle(&self, rect_idx: usize, new_x: f32, new_y: f32, is_inside: bool, intersects: bool) -> Option<(f32, f32)> {
+        const SNAP_MARGIN_PERCENTAGE: f32 = 0.05;
+
+        if let Some(output) = &self.algorithm_output {
+            if rect_idx >= output.placements.len() {
+                return None;
+            }
+
+            let p = &output.placements[rect_idx];
+            let rect_width = p.width as f32;
+            let rect_height = p.height as f32;
+            let snap_margin = rect_width.min(rect_height) * SNAP_MARGIN_PERCENTAGE;
+
+            let bin_width = output.bin_width as f32;
+            let bin_height = output.total_height as f32;
+
+            let mut final_x = new_x;
+            let mut final_y = new_y;
+
+            if is_inside && !intersects {
+                return Some((new_x, new_y));
+            }
+
+            if !intersects && !is_inside {
+                let mut snapped = false;
+
+                if new_x < 0.0 && new_x.abs() <= snap_margin {
+                    final_x = 0.0;
+                    snapped = true;
+                } else if new_x + rect_width > bin_width && (new_x + rect_width - bin_width) <= snap_margin {
+                    final_x = bin_width - rect_width;
+                    snapped = true;
+                }
+
+                if new_y < 0.0 && new_y.abs() <= snap_margin {
+                    final_y = 0.0;
+                    snapped = true;
+                } else if new_y + rect_height > bin_height && (new_y + rect_height - bin_height) <= snap_margin {
+                    final_y = bin_height - rect_height;
+                    snapped = true;
+                }
+
+                if snapped {
+                    return Some((final_x, final_y));
+                }
+            }
+
+            None
+        } else {
+            None
+        }
+    }
+
+    fn recalculate_bin_height(&mut self) {
+        if let Some(output) = &mut self.algorithm_output {
+            let mut max_height = 0.0;
+            for placement in &output.placements {
+                let top = placement.y + placement.height as f32;
+                if top > max_height {
+                    max_height = top;
+                }
+            }
+            output.total_height = max_height;
+        }
+    }
+
     fn parse_rectangles(&self) -> Result<ParseOutput, Vec<String>> {
         let text = self.rectangle_data.text();
         let mut rectangles = Vec::new();

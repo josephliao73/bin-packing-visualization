@@ -1,6 +1,7 @@
 mod config_parser;
 mod ui;
 mod types;
+mod canvas;
 
 use crate::types::{PackingApp};
 

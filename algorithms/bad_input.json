@@ -1,0 +1,23 @@
+{
+  "width_of_bin": 5,
+  "number_of_rectangles": 5,
+  "number_of_types_of_rectangles": 3,
+  "autofill_option": false,
+  "rectangle_list": [
+    {
+      "width": 2,
+      "height": 2,
+      "quantity": 2
+    },
+    {
+      "width": 3,
+      "height": 3,
+      "quantity": 1
+    },
+    {
+      "width": 1,
+      "height": 1,
+      "quantity": 2
+    }
+  ]
+}

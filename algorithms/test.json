@@ -1,0 +1,43 @@
+{
+  "width_of_bin": 100,
+  "number_of_rectangles": 20,
+  "number_of_types_of_rectangles": 7,
+  "autofill_option": true,
+  "rectangle_list": [
+    {
+      "width": 1,
+      "height": 1,
+      "quantity": 2
+    },
+    {
+      "width": 2,
+      "height": 2,
+      "quantity": 2
+    },
+    {
+      "width": 2,
+      "height": 3,
+      "quantity": 2
+    },
+    {
+      "width": 16,
+      "height": 1,
+      "quantity": 1
+    },
+    {
+      "width": 28,
+      "height": 1,
+      "quantity": 1
+    },
+    {
+      "width": 56,
+      "height": 3,
+      "quantity": 2
+    },
+    {
+      "width": 83,
+      "height": 2,
+      "quantity": 10
+    }
+  ]
+}

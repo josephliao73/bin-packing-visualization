@@ -5,7 +5,6 @@ with open("test.json") as f:
 
 bin_width = d["width_of_bin"]
 
-# Step 1: expand rectangles into individual items
 items = []
 for item in d["rectangle_list"]:
     for _ in range(item["quantity"]):
@@ -14,7 +13,6 @@ for item in d["rectangle_list"]:
             "height": item["height"]
         })
 
-# Step 2: sort by height decreasing (NFDH requirement)
 items.sort(key=lambda x: -x["height"])
 
 placements = []
